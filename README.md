@@ -1,55 +1,75 @@
-# rail-pass-trip-planner
+# travel-itinerary-planner
 
-A Claude skill that plans **cost-optimised, multi-city European trips around an Interrail / Eurail pass** and delivers a day-by-day itinerary you can actually follow: verified train numbers, time slots for every sight, three hotel options near each station, a booking checklist, a budget in your home currency, and an optional Word export.
+**An AI travel-planning skill that asks before it plans, verifies before it promises, and delivers a plan you can actually follow.**
+一个先问清需求、再按偏好定制、最后交付可执行行程的 AI 旅行规划技能。
 
-一个 Claude 技能：围绕 Interrail / Eurail 通票，规划最省钱的欧洲多城铁路旅行，输出可以照着走的逐日行程——核实过的车次、每个景点的时间段、车站附近 3 家住宿选择、订票清单、预算表，并可导出 Word。
+Works as an [Agent Skill](https://agentskills.io) in Claude, Codex, Cursor, Gemini CLI and other skill-compatible agents, and as a single paste-in prompt for chat assistants without skills (DeepSeek, ChatGPT, Kimi, Qwen, …).
 
-## Why
+## What it does / 它做什么
 
-Rail-pass plans usually fail on details, not ideas:
+1. **Intake / 需求确认** — from where to where, how many days, how to travel (fly, train, Interrail/Eurail pass, drive…), budget, and the kind of trip:
+   - 🎢 **Fun & entertainment 娱乐** — how to have the best time: events, nightlife, experiences, pacing
+   - 🏛️ **History & culture 历史人文** — what's genuinely worth it, short background stories, how to visit
+   - 🍝 **Food 美食** — signature dishes, cheap local spots, beating queues, dietary needs
+   - 📸 **Photo spots 出片** — exact places to stand, best light, angles and pose ideas
+2. **Route & transport skeleton** — live fares incl. bags, timetables checked for the actual weekday, rail-pass traps (what the pass doesn't cover, reservation quotas).
+3. **Day-by-day plan** — time slots for every stop, tailored to the chosen style, sunsets, closing days, buffers, backups.
+4. **Deliverable** — detailed itinerary · hotels (3 per stop) · **cost estimate 预估花费** · **itemised bill 预估账单** · **pitfalls guide 避坑指南** · **holiday & closure warnings 节假日/闭馆提醒** · friendly tips · booking checklist — as Markdown, a shared doc, or Word.
 
-- a "direct" train the pass doesn't cover (Italo, EAV private lines, Leonardo Express for 2nd class)
-- a pass-holder reservation quota that sold out (Renfe international AVE, TGV)
-- a regional that doesn't run on Saturdays / Sundays / holidays
-- a palace closed on Tuesdays, a sunset at 16:40 in December
-- a cheap flight that isn't cheap once you add the cabin bag
-
-The skill makes Claude verify each leg against a real timetable for that weekday, prefer reservation-free trains when they don't cost the day, flag what to book first, and keep every copy of the plan in sync when you change your mind.
-
-## What's inside
+## Repository layout
 
 ```
-rail-pass-trip-planner/
-├── SKILL.md                         # the workflow Claude follows
+travel-itinerary-planner/            ← the skill (copy this folder)
+├── SKILL.md
 ├── references/
-│   ├── pass-rules.md                # reservation fees, exclusions, country traps (IT / FR / ES)
-│   └── itinerary-template.md        # skeleton of the final document
+│   ├── intake.md
+│   ├── deliverable-template.md
+│   ├── styles/        fun · history-culture · food · photo
+│   └── transport/     rail-pass (Interrail/Eurail, IT/FR/ES) · other-modes
 ├── scripts/
-│   └── md_to_docx.py                # Markdown → styled .docx (A4, CJK font, coloured tables)
+│   ├── bill.py        itemised bill CSV → totals by category & currency
+│   └── md_to_docx.py  Markdown → styled Word
 └── examples/
-    └── rome-benevento-riviera-barcelona-2weeks.md   # full worked example (Chinese)
+    └── rome-benevento-riviera-barcelona-2weeks.md
+dist/system-prompt.md                ← single-file prompt for agents without skills
+scripts/build_prompt.py · check.py   ← regenerate the prompt · validate the skill
+AGENTS.md
 ```
 
-## Install
+## Install / 安装
 
-- **Claude.ai / Claude app**: download `rail-pass-trip-planner.skill` from Releases (or zip the `rail-pass-trip-planner/` folder) and add it under *Settings → Capabilities → Skills*.
-- **Claude Code**: copy the `rail-pass-trip-planner/` folder into `~/.claude/skills/` (or your project's `.claude/skills/`).
+| Platform | How |
+| --- | --- |
+| **Claude (app / claude.ai)** | Download `travel-itinerary-planner.skill` from Releases → Settings → Capabilities → Skills → upload. |
+| **Claude Code** | `cp -r travel-itinerary-planner ~/.claude/skills/` (or `.claude/skills/` in a project) |
+| **OpenAI Codex CLI** | `mkdir -p ~/.agents/skills && cp -r travel-itinerary-planner ~/.agents/skills/` (or `.agents/skills/` in a repo) |
+| **Other skill-compatible agents** (Cursor, Gemini CLI, …) | Copy the folder into that tool's skills directory — see its docs. |
+| **DeepSeek / ChatGPT / Kimi / Qwen / any chat assistant** | Paste [`dist/system-prompt.md`](dist/system-prompt.md) as the system prompt / custom instructions, or at the start of a chat. |
 
-The Word export needs [`pandoc`](https://pandoc.org/) and `pip install python-docx`.
+Optional for scripts: Python 3, `pip install python-docx`, and [pandoc](https://pandoc.org/) for Word export. Without web access or code execution the skill still works — it labels prices and timetables as estimates and does the arithmetic by hand.
 
-## Try it
+## Try it / 试一试
 
-> I have a continuous Interrail Global Pass (2nd class) until 31 Dec. I want to fly from Birmingham to Rome on 23 Nov, spend an afternoon in Rome, stay with a friend in Benevento for a few days, then go through Italy, the south of France and Spain and fly home from Spain — about two weeks. I'm on a budget and mostly want exterior photos of landmarks. Make a detailed plan and a Word file.
+> 我 11 月 23 日从伯明翰出发，有 Interrail 连续型通票，想去罗马玩半天，在贝内文托朋友家住几天，再经意大利、法国南部到西班牙，两周左右，从西班牙飞回。省钱优先，景点外观拍照就行。帮我出详细行程和 Word。
 
-> 我有 Interrail 连续型通票，想从米兰到巴塞罗那玩 10 天，只坐不用订座的车可以吗？帮我排一下。
+> Weekend in Lisbon for a couple, foodie trip, mid budget — where to eat without queues, and two great photo spots for sunset?
 
-## Example output
+> 带爸妈去京都 5 天，历史人文为主，走路不能太多，每个景点讲讲背景。
 
-See [`examples/rome-benevento-riviera-barcelona-2weeks.md`](rail-pass-trip-planner/examples/rome-benevento-riviera-barcelona-2weeks.md): 15 days, Rome → Benevento (base for Naples, Salerno, Caserta) → Florence → Pisa → Genoa → Nice/Èze/Monaco → Marseille → Barcelona, with only 3 paid reservations (≈ €41).
+## Example
+
+[`examples/rome-benevento-riviera-barcelona-2weeks.md`](travel-itinerary-planner/examples/rome-benevento-riviera-barcelona-2weeks.md): 15 days Rome → Benevento (base for Naples, Salerno, Caserta) → Florence → Pisa → Genoa → Nice/Èze/Monaco → Marseille → Barcelona with only 3 paid rail reservations (≈ €41).
+
+## Development
+
+```bash
+python scripts/check.py         # validate frontmatter, file references, script tests
+python scripts/build_prompt.py  # regenerate dist/system-prompt.md after editing the skill
+```
 
 ## Caveats
 
-Fees, timetables and prices change. The skill tells Claude to label every price with its query date and to say when a train time was taken from a different date — always re-check in the operators' apps 1–2 days before travel. The skill never books or pays on your behalf.
+Prices, timetables and opening hours change. The skill labels every price with its query date and flags times taken from a different date — re-check in official apps 1–2 days before travel. It never books or pays on your behalf.
 
 ## License
 
