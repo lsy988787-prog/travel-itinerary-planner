@@ -40,7 +40,7 @@ AGENTS.md
 
 | Platform | How |
 | --- | --- |
-| **Claude (app / claude.ai)** | Download `travel-itinerary-planner.skill` from Releases → Settings → Capabilities → Skills → upload. |
+| **Claude (app / claude.ai)** | Download [`dist/travel-itinerary-planner.skill`](dist/travel-itinerary-planner.skill) → Settings → Capabilities → Skills → upload. |
 | **Claude Code** | `cp -r travel-itinerary-planner ~/.claude/skills/` (or `.claude/skills/` in a project) |
 | **OpenAI Codex CLI** | `mkdir -p ~/.agents/skills && cp -r travel-itinerary-planner ~/.agents/skills/` (or `.agents/skills/` in a repo) |
 | **Other skill-compatible agents** (Cursor, Gemini CLI, …) | Copy the folder into that tool's skills directory — see its docs. |
